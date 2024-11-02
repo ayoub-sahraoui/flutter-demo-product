@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/models/product.dart';
 import 'package:flutter_demo/screens/add_product_dialog.dart';
 import 'package:flutter_demo/screens/product_item.dart';
 
@@ -10,34 +11,31 @@ class ProductsList extends StatefulWidget {
 }
 
 class _ProductsListState extends State<ProductsList> {
-  List<String> _products = [
-    "Apple",
-    "Banana",
-    "Cherry",
-    "Date",
-    "Elderberry",
-    "Fig",
-    "Grape",
-    "Honeydew",
-    "Jackfruit",
-    "Kiwi",
-    "Lemon",
-    "Mango",
-    "Nectarine",
-    "Orange",
-    "Papaya",
-    "Quince",
-    "Raspberry",
-    "Strawberry",
-    "Tangerine",
-    "Ugli fruit",
-    "Vanilla bean",
-    "Watermelon",
-    "Ximenia caffra",
-    "Yuzu",
-    "Zucchini",
+  List<Product> _products = [
+    Product(
+      id: 1,
+      libelle: "Apple iPhone 13",
+      description: "6.1-inch display, A15 Bionic chip, 128GB storage",
+      prix: 799.0,
+      photo: "assets/images/1.jpg",
+    ),
+    Product(
+      id: 2,
+      libelle: "Samsung Galaxy S21",
+      description: "6.2-inch display, Exynos 2100, 128GB storage",
+      prix: 699.0,
+      photo: "assets/images/2.jpg",
+    ),
+    Product(
+      id: 3,
+      libelle: "Sony WH-1000XM4 Headphones",
+      description: "Wireless noise-canceling headphones",
+      prix: 349.0,
+      photo: "assets/images/3.jpg",
+    ),
   ];
-  final List<String> _selectedProducts = [];
+
+  final List<int> _selectedProductsIds = [];
 
   @override
   Widget build(BuildContext context) {
@@ -47,28 +45,26 @@ class _ProductsListState extends State<ProductsList> {
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
-            onPressed: () {
-              _addProduct();
-            },
+            onPressed: _addProduct,
           ),
           IconButton(
-              onPressed: () {
-                _deleteSelectedProducts();
-              },
-              icon: const Icon(Icons.delete_forever)),
+            onPressed: _deleteSelectedProducts,
+            icon: const Icon(Icons.delete_forever),
+          ),
         ],
       ),
       body: Padding(
-        padding: const EdgeInsets.only(left: 16, right: 16, top: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: ListView.builder(
           itemCount: _products.length,
           itemBuilder: (context, index) {
+            final product = _products[index];
             return ProductItem(
-              name: _products[index],
-              onDelete: () {
-                _deleteProduct(index);
-              },
-              onSelected: _selectionChanged,
+              isSelected: _selectedProductsIds.contains(product.id),
+              product: product,
+              onDelete: () => _deleteProduct(product.id),
+              onSelected: (product, isSelected) =>
+                  _selectionChanged(product.id, isSelected),
             );
           },
         ),
@@ -77,39 +73,43 @@ class _ProductsListState extends State<ProductsList> {
   }
 
   void _deleteSelectedProducts() {
-    final List<String> newProducts = List.from(_products);
-    for (final product in _selectedProducts) {
-      newProducts.remove(product);
-    }
-
     setState(() {
-      _products = newProducts;
-      _selectedProducts.clear();
+      _products
+          .removeWhere((product) => _selectedProductsIds.contains(product.id));
+      _selectedProductsIds.clear();
     });
   }
 
-  void _selectionChanged(String name, bool? isSelected) {
-    if (isSelected == true) {
-      _selectedProducts.add(name);
-    } else {
-      _selectedProducts.remove(name);
-    }
+  void _selectionChanged(int id, bool? isSelected) {
+    setState(() {
+      if (isSelected == true) {
+        _selectedProductsIds.add(id);
+      } else {
+        _selectedProductsIds.remove(id);
+      }
+    });
   }
 
-  void _deleteProduct(int index) {
+  void _deleteProduct(int productId) {
     setState(() {
-      _products.removeAt(index);
+      _products.removeWhere((product) => product.id == productId);
     });
   }
 
   void _addProduct() async {
-    final result = await showDialog<String>(
+    final result = await showDialog<Map<String, dynamic>>(
       context: context,
       builder: (context) => AddProductDialog(),
     );
     if (result != null) {
       setState(() {
-        _products.add(result);
+        _products.add(Product(
+          id: _products.length + 1,
+          libelle: result['libelle'],
+          description: result['description'],
+          prix: result['prix'],
+          photo: result['photo'],
+        ));
       });
     }
   }
