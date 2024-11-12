@@ -1,23 +1,19 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_demo/data/base.dart';
+import 'package:flutter_demo/data/daos/produit_dao.dart';
 import 'package:flutter_demo/models/product.dart';
 import 'package:flutter_demo/screens/product_details.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:get_it/get_it.dart';
 
 class ProductItem extends StatefulWidget {
   ProductItem({
     super.key,
     required this.product,
-    required this.onDelete,
-    required this.onSelected,
-    required this.isSelected,
   });
 
-  final Product product;
-  final Function(Product, bool?) onSelected;
-  final Function onDelete;
-  bool isSelected = false;
+  final Produit product;
 
   @override
   State<ProductItem> createState() => _ProductItemState();
@@ -38,7 +34,11 @@ class _ProductItemState extends State<ProductItem> {
           motion: const ScrollMotion(),
           children: [
             SlidableAction(
-              onPressed: (context) => widget.onDelete(),
+              onPressed: (context) {
+                GetIt.instance
+                    .get<ProduitDAO>()
+                    .deleteProduitById(widget.product.id);
+              },
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
               icon: Icons.delete,
@@ -56,15 +56,6 @@ class _ProductItemState extends State<ProductItem> {
           ),
           child: Row(
             children: [
-              Checkbox(
-                value: widget.isSelected,
-                onChanged: (isSelected) {
-                  setState(() {
-                    widget.onSelected(widget.product, isSelected);
-                    widget.isSelected = isSelected!;
-                  });
-                },
-              ),
               if (widget.product.photo.isNotEmpty)
                 Container(
                   margin: const EdgeInsets.only(right: 10),
