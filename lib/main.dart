@@ -1,6 +1,10 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_demo/data/base.dart';
 import 'package:flutter_demo/data/daos/produit_dao.dart';
+import 'package:flutter_demo/firebase_options.dart';
+import 'package:flutter_demo/screens/login_ecran.dart';
 import 'package:flutter_demo/screens/products_list.dart';
 import 'package:get_it/get_it.dart';
 
@@ -58,9 +62,13 @@ void setupLocator() {
   getIt.get<ProduitDAO>().insertProduit(produit5);
 }
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setupLocator();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseUIAuth.configureProviders([
+    EmailAuthProvider(),
+  ]);
   runApp(const MyApp());
 }
 
@@ -75,7 +83,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: ProductsList(),
+      home: LoginEcran(),
     );
   }
 }
