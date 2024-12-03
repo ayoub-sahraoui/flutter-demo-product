@@ -15,18 +15,20 @@ class LoginEcran extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasData) {
-              return Column(
-                children: [
-                  Text('User Email: ${snapshot.data!.email}'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      FirebaseAuth.instance.signOut();
-                    },
-                    child: const Text('Sign out'),
-                  ),
-                  Text('User is logged in'),
-                ],
+              return SafeArea(
+                child: Column(
+                  children: [
+                    Text('User Email: ${snapshot.data!.email}'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        FirebaseAuth.instance.signOut();
+                      },
+                      child: const Text('Sign out'),
+                    ),
+                    Text('User is logged in'),
+                  ],
+                ),
               );
             }
             return SignInScreen();
